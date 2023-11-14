@@ -299,7 +299,7 @@ export const viewCart = async (req, res, next) => {
 export const removeItem = async (req, res, next) => {
   try {
     const { productId, userId, qty } = req.body;
-    
+    // console.log("req.body",req.body)
     let findCartItem = await Cart.findOne(
       { productId },
       { productId: 1, qty: 1 }
@@ -339,20 +339,22 @@ export const removeItem = async (req, res, next) => {
         { productId },
       );
 
-      let removeItemFromUser = await User.updateOne(
-        { userId },
-        {
-          $pull:{
-            cart: new Types.ObjectId(findCartItem)
-          }
-        }
-      );
-
       const updateQty = await Product.updateOne({ productId},{
         $set:{
           availableQty:findCartItem.qty+qty
         }
       });
+
+      let removeItemFromUser = await User.updateOne(
+        { userId },
+        {
+          $pull:{
+            cart: new Types.ObjectId(findCartItem._id)
+          }
+        }
+      );
+
+      
 
       if (updateCart.modifiedCount < 1) {
         res
